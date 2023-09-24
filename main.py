@@ -32,18 +32,22 @@ def update_output_directory():
 
     print(f"Output directory updated to: {new_output_folder}")
 
-def clone_repositories(json_file):
-    # Load the config file to get the output folder
+def clone_repositories():
+    # Load the config file to get the output folder and input JSON file path
     with open(CONFIG_FILE, 'r') as cf:
         config = json.load(cf)
         output_folder = config.get('output_folder')
+        input_json_file = config.get('input_json_file')
 
     if not output_folder:
         print("Error: 'output_folder' not found in the config file.")
         return
+    if not input_json_file:
+        print("Error: 'input_json_file' not found in the config file.")
+        return
 
     # Load the JSON file containing repository information
-    with open(json_file, 'r') as f:
+    with open(input_json_file, 'r') as f:
         repos = json.load(f)
 
     # Create the output folder if it doesn't exist
@@ -68,12 +72,10 @@ def clone_repositories(json_file):
                     print(f"Failed to clone {repo_name}.")
 
 if __name__ == "__main__":
-    json_file = input("Enter the JSON file path containing repository information: ")
-
     while True:
         action = input("Select an action (clone/update_config/quit): ")
         if action == "clone":
-            clone_repositories(json_file)
+            clone_repositories()
         elif action == "update_config":
             update_output_directory()
         elif action == "quit":
