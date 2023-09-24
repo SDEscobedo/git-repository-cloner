@@ -2,6 +2,12 @@ import json
 import subprocess
 import os
 
+# ANSI escape codes for colors
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+RESET = "\033[0m"
+
 CONFIG_FILE = "config.json"
 
 def is_repo_cloned(repo_path, expected_remote_url):
@@ -20,6 +26,10 @@ def is_repo_cloned(repo_path, expected_remote_url):
         pass  # Ignore Git errors
 
     return False
+
+def colored_print(message, color=RESET):
+    print(f"{color}{message}{RESET}")
+
 def update_config(output_folder=None, input_json_file=None):
     # Load the existing configuration
     try:
@@ -38,7 +48,7 @@ def update_config(output_folder=None, input_json_file=None):
     with open(CONFIG_FILE, 'w') as cf:
         json.dump(config, cf, indent=4)
 
-    print("Configuration updated.")
+    colored_print("Configuration updated.", GREEN)
 
 def check_cloned_repositories():
     # Load the config file to get the output folder and input JSON file path
@@ -48,17 +58,17 @@ def check_cloned_repositories():
         input_json_file = config.get('input_json_file')
 
     if not output_folder:
-        print("Error: 'output_folder' not found in the config file.")
+        colored_print("Error: 'output_folder' not found in the config file.", RED)
         return
     if not input_json_file:
-        print("Error: 'input_json_file' not found in the config file.")
+        colored_print("Error: 'input_json_file' not found in the config file.", RED)
         return
 
     # Load the JSON file containing repository information
     with open(input_json_file, 'r') as f:
         repos = json.load(f)
 
-    print("Checking cloned repositories:")
+    colored_print("Checking cloned repositories:")
     for repo in repos:
         repo_name = repo.get('name')
         repo_url = repo.get('url')
@@ -66,9 +76,9 @@ def check_cloned_repositories():
             repo_path = os.path.join(output_folder, repo_name)
 
             if is_repo_cloned(repo_path, repo_url):
-                print(f"Repository {repo_name} is already cloned with matching remote URL.")
+                colored_print(f"Repository {repo_name} is already cloned with matching remote URL.", GREEN)
             else:
-                print(f"Repository {repo_name} is not cloned.")
+                colored_print(f"Repository {repo_name} is not cloned.", YELLOW)
 
 def clone_repositories():
     # Load the config file to get the output folder and input JSON file path
@@ -78,10 +88,10 @@ def clone_repositories():
         input_json_file = config.get('input_json_file')
 
     if not output_folder:
-        print("Error: 'output_folder' not found in the config file.")
+        colored_print("Error: 'output_folder' not found in the config file.", RED)
         return
     if not input_json_file:
-        print("Error: 'input_json_file' not found in the config file.")
+        colored_print("Error: 'input_json_file' not found in the config file.", RED)
         return
 
     # Load the JSON file containing repository information
@@ -92,7 +102,7 @@ def clone_repositories():
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    # Loop through each repository and clone it if not already cloned
+    colored_print("Cloning repositories:")
     for repo in repos:
         repo_name = repo.get('name')
         repo_url = repo.get('url')
@@ -100,14 +110,14 @@ def clone_repositories():
             repo_path = os.path.join(output_folder, repo_name)
 
             if is_repo_cloned(repo_path, repo_url):
-                print(f"Repository {repo_name} is already cloned with matching remote URL. Skipping.")
+                colored_print(f"Repository {repo_name} is already cloned with matching remote URL. Skipping.", YELLOW)
             else:
                 # Clone the repository using the git command
                 try:
                     subprocess.run(['git', 'clone', repo_url, repo_path], check=True)
-                    print(f"Cloned {repo_name} successfully.")
+                    colored_print(f"Cloned {repo_name} successfully.", GREEN)
                 except subprocess.CalledProcessError:
-                    print(f"Failed to clone {repo_name}.")
+                    colored_print(f"Failed to clone {repo_name}.", RED)
 
 if __name__ == "__main__":
     while True:
@@ -125,4 +135,4 @@ if __name__ == "__main__":
         elif action == "quit":
             break
         else:
-            print("Invalid action. Please choose 'clone', 'update_config', 'update_input_file', 'check_cloned', or 'quit'.")
+            colored_print("Invalid action. Please choose 'clone', 'set-output', 'set-input', 'check-cloned', or 'quit'.", RED)
