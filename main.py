@@ -2,10 +2,22 @@ import json
 import subprocess
 import os
 
-def is_repo_cloned(repo_path):
-    # Check if the repository directory exists
-    return os.path.exists(repo_path)
+def is_repo_cloned(repo_path, expected_remote_url):
+    # Check if the directory exists
+    if not os.path.exists(repo_path):
+        return False
+    
+    # Check if it's a Git repository
+    try:
+        # Use git remote to get the repository's remote URL
+        result = subprocess.run(['git', 'remote', 'get-url', 'origin'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0:
+            remote_url = result.stdout.strip()
+            return remote_url == expected_remote_url
+    except subprocess.CalledProcessError:
+        pass  # Ignore Git errors
 
+    return False
 def clone_repositories(json_file, output_folder):
     # Load the JSON file containing repository information
     with open(json_file, 'r') as f:
@@ -22,7 +34,7 @@ def clone_repositories(json_file, output_folder):
         if repo_name and repo_url:
             repo_path = os.path.join(output_folder, repo_name)
 
-            if is_repo_cloned(repo_path):
+            if is_repo_cloned(repo_path, repo_url):
                 print(f"Repository {repo_name} is already cloned. Skipping.")
             else:
                 # Clone the repository using the git command
