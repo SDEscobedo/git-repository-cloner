@@ -2,6 +2,8 @@ import json
 import subprocess
 import os
 
+CONFIG_FILE = "config.json"
+
 def is_repo_cloned(repo_path, expected_remote_url):
     # Check if the directory exists
     if not os.path.exists(repo_path):
@@ -18,9 +20,21 @@ def is_repo_cloned(repo_path, expected_remote_url):
         pass  # Ignore Git errors
 
     return False
-def clone_repositories(json_file, config_file):
+def update_output_directory():
+    new_output_folder = input("Enter the new output folder path: ")
+    if not os.path.exists(new_output_folder):
+        print(f"Error: The specified directory '{new_output_folder}' does not exist.")
+        return
+
+    config = {"output_folder": new_output_folder}
+    with open(CONFIG_FILE, 'w') as cf:
+        json.dump(config, cf, indent=4)
+
+    print(f"Output directory updated to: {new_output_folder}")
+
+def clone_repositories(json_file):
     # Load the config file to get the output folder
-    with open(config_file, 'r') as cf:
+    with open(CONFIG_FILE, 'r') as cf:
         config = json.load(cf)
         output_folder = config.get('output_folder')
 
@@ -55,6 +69,14 @@ def clone_repositories(json_file, config_file):
 
 if __name__ == "__main__":
     json_file = input("Enter the JSON file path containing repository information: ")
-    config_file = "config.json"  # Adjust the path to your config file
 
-    clone_repositories(json_file, config_file)
+    while True:
+        action = input("Select an action (clone/update_config/quit): ")
+        if action == "clone":
+            clone_repositories(json_file)
+        elif action == "update_config":
+            update_output_directory()
+        elif action == "quit":
+            break
+        else:
+            print("Invalid action. Please choose 'clone', 'update_config', or 'quit'.")
