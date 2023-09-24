@@ -22,7 +22,7 @@ Git Repository Cloner is a Python script that allows you to manage and clone rem
 1. Clone this repository to your local machine:
 
    ```bash
-   git clone https://github.com/your-username/git-repository-cloner.git
+   git clone https://github.com/SDEscobedo/git-repository-cloner.git
    ```
 
 2. Change to the project directory:
@@ -36,11 +36,11 @@ Git Repository Cloner is a Python script that allows you to manage and clone rem
    ```json
    {
        "output_folder": "/path/to/your/output/folder",
-       "input_json_file": "/path/to/your/input/repo.json"
+       "input_json_file": "/path/to/your/input/repos.json"
    }
    ```
 
-   Replace `/path/to/your/output/folder` with the desired output directory path and `/path/to/your/input/repo.json` with the path to your JSON input file containing the list of repositories to clone.
+   Replace `/path/to/your/output/folder` with the desired output directory path and `/path/to/your/input/repos.json` with the path to your JSON input file containing the list of repositories to clone.
 
 ### Usage
 
@@ -53,9 +53,9 @@ python git_repository_cloner.py
 You will be presented with a menu of actions to choose from:
 
 - `clone`: Clone the repositories specified in the JSON file.
-- `update_config`: Update the output directory path in the `config.json` file.
-- `update_input_file`: Update the input JSON file path in the `config.json` file.
-- `check_cloned`: Check which repositories are already cloned without cloning them again.
+- `set-output`: Update the output directory path in the `config.json` file.
+- `set-input`: Update the input JSON file path in the `config.json` file.
+- `check-cloned`: Check which repositories are already cloned without cloning them again.
 - `quit`: Exit the script.
 
 ## License

@@ -111,16 +111,16 @@ def clone_repositories():
 
 if __name__ == "__main__":
     while True:
-        action = input("Select an action (clone/update_config/update_input_file/check_cloned/quit): ")
+        action = input("Select an action (clone/set-output/set-input/check-cloned/quit): ")
         if action == "clone":
             clone_repositories()
-        elif action == "update_config":
+        elif action == "set-output":
             new_output_folder = input("Enter the new output folder path: ")
             update_config(output_folder=new_output_folder)
-        elif action == "update_input_file":
+        elif action == "set-input":
             new_input_file = input("Enter the new input JSON file path: ")
             update_config(input_json_file=new_input_file)
-        elif action == "check_cloned":
+        elif action == "check-cloned":
             check_cloned_repositories()
         elif action == "quit":
             break
