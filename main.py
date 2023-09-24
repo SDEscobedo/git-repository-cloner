@@ -20,17 +20,55 @@ def is_repo_cloned(repo_path, expected_remote_url):
         pass  # Ignore Git errors
 
     return False
-def update_output_directory():
-    new_output_folder = input("Enter the new output folder path: ")
-    if not os.path.exists(new_output_folder):
-        print(f"Error: The specified directory '{new_output_folder}' does not exist.")
-        return
+def update_config(output_folder=None, input_json_file=None):
+    # Load the existing configuration
+    try:
+        with open(CONFIG_FILE, 'r') as cf:
+            config = json.load(cf)
+    except FileNotFoundError:
+        config = {}
 
-    config = {"output_folder": new_output_folder}
+    # Update the configuration based on user input
+    if output_folder is not None:
+        config["output_folder"] = output_folder
+    if input_json_file is not None:
+        config["input_json_file"] = input_json_file
+
+    # Save the updated configuration
     with open(CONFIG_FILE, 'w') as cf:
         json.dump(config, cf, indent=4)
 
-    print(f"Output directory updated to: {new_output_folder}")
+    print("Configuration updated.")
+
+def check_cloned_repositories():
+    # Load the config file to get the output folder and input JSON file path
+    with open(CONFIG_FILE, 'r') as cf:
+        config = json.load(cf)
+        output_folder = config.get('output_folder')
+        input_json_file = config.get('input_json_file')
+
+    if not output_folder:
+        print("Error: 'output_folder' not found in the config file.")
+        return
+    if not input_json_file:
+        print("Error: 'input_json_file' not found in the config file.")
+        return
+
+    # Load the JSON file containing repository information
+    with open(input_json_file, 'r') as f:
+        repos = json.load(f)
+
+    print("Checking cloned repositories:")
+    for repo in repos:
+        repo_name = repo.get('name')
+        repo_url = repo.get('url')
+        if repo_name and repo_url:
+            repo_path = os.path.join(output_folder, repo_name)
+
+            if is_repo_cloned(repo_path, repo_url):
+                print(f"Repository {repo_name} is already cloned with matching remote URL.")
+            else:
+                print(f"Repository {repo_name} is not cloned.")
 
 def clone_repositories():
     # Load the config file to get the output folder and input JSON file path
@@ -73,12 +111,18 @@ def clone_repositories():
 
 if __name__ == "__main__":
     while True:
-        action = input("Select an action (clone/update_config/quit): ")
+        action = input("Select an action (clone/update_config/update_input_file/check_cloned/quit): ")
         if action == "clone":
             clone_repositories()
         elif action == "update_config":
-            update_output_directory()
+            new_output_folder = input("Enter the new output folder path: ")
+            update_config(output_folder=new_output_folder)
+        elif action == "update_input_file":
+            new_input_file = input("Enter the new input JSON file path: ")
+            update_config(input_json_file=new_input_file)
+        elif action == "check_cloned":
+            check_cloned_repositories()
         elif action == "quit":
             break
         else:
-            print("Invalid action. Please choose 'clone', 'update_config', or 'quit'.")
+            print("Invalid action. Please choose 'clone', 'update_config', 'update_input_file', 'check_cloned', or 'quit'.")
