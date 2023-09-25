@@ -119,9 +119,32 @@ def clone_repositories():
                 except subprocess.CalledProcessError:
                     colored_print(f"Failed to clone {repo_name}.", RED)
 
+def extract_repositories(output_folder, output_json_file):
+    output_data = []
+    for root, dirs, files in os.walk(output_folder):
+        if ".git" in dirs:
+            # This directory contains a .git subdirectory, indicating it's a Git repository
+            repo_name = os.path.basename(root)
+            repo_path = os.path.join(root, ".git")
+
+            try:
+                result = subprocess.run(['git', 'config', '--get', 'remote.origin.url'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if result.returncode == 0:
+                    remote_url = result.stdout.strip()
+                    repo_info = {"name": repo_name, "url": remote_url}
+                    output_data.append(repo_info)
+            except subprocess.CalledProcessError:
+                pass  # Ignore Git errors
+
+    with open(output_json_file, 'w') as f:
+        json.dump(output_data, f, indent=4)
+
+    colored_print(f"Repositories extracted and saved to {output_json_file}.", GREEN)
+
+
 if __name__ == "__main__":
     while True:
-        action = input("Select an action (clone/set-output/set-input/check-cloned/quit): ")
+        action = input("Select an action (clone/set-output/set-input/check-cloned/extract/quit): ")
         if action == "clone":
             clone_repositories()
         elif action == "set-output":
@@ -132,7 +155,11 @@ if __name__ == "__main__":
             update_config(input_json_file=new_input_file)
         elif action == "check-cloned":
             check_cloned_repositories()
+        elif action == "extract":
+            output_folder = input("Enter the output folder path containing Git repositories: ")
+            output_json_file = input("Enter the output JSON file path for extracted repositories: ")
+            extract_repositories(output_folder, output_json_file)
         elif action == "quit":
             break
         else:
-            colored_print("Invalid action. Please choose 'clone', 'set-output', 'set-input', 'check-cloned', or 'quit'.", RED)
+            colored_print("Invalid action. Please choose 'clone', 'set-output', 'set-input', 'check-cloned', 'extract', or 'quit'.", RED)
