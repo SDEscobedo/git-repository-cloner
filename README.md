@@ -9,6 +9,7 @@ Git Repository Cloner is a Python script that allows you to manage and clone rem
 - Specify the output directory for cloned repositories.
 - Update the output directory and input JSON file path through a user-friendly interface.
 - Check which repositories are already cloned without cloning them again.
+- Generate JSON input file from the directory you have your repos.
 
 ## Getting Started
 
@@ -56,6 +57,7 @@ You will be presented with a menu of actions to choose from:
 - `set-output`: Update the output directory path in the `config.json` file.
 - `set-input`: Update the input JSON file path in the `config.json` file.
 - `check-cloned`: Check which repositories are already cloned without cloning them again.
+- `extract`: Generate a JSON file with a list of repos from a specified directory.
 - `quit`: Exit the script.
 
 ## License
