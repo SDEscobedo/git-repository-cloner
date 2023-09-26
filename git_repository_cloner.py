@@ -145,9 +145,43 @@ def extract_repositories(output_folder, output_json_file):
 
     colored_print(f"Repositories extracted and saved to {output_json_file}.", GREEN)
 
+def check_repo_status():
+    # Load the config file to get the input JSON file path
+    with open(CONFIG_FILE, 'r') as cf:
+        config = json.load(cf)
+        input_json_file = config.get('input_json_file')
+
+    if not input_json_file:
+        colored_print("Error: 'input_json_file' not found in the config file.", RED)
+        return
+
+    # Load the JSON file containing repository information
+    with open(input_json_file, 'r') as f:
+        repos = json.load(f)
+
+    colored_print("Checking Git repository status:")
+    for repo in repos:
+        repo_name = repo.get('name')
+        repo_path = os.path.join(config.get('output_folder', ''), repo_name)
+
+        if repo_name:
+            try:
+                result = subprocess.run(['git', 'status'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                status_message = result.stdout.strip()
+                
+                # Check for common status keywords or phrases
+                if any(keyword in status_message.lower() for keyword in ["nothing to commit", "nada para hacer commit"]):
+                    colored_print(f"Repository {repo_name}: {status_message}", GREEN)
+                elif "Changes not staged for commit" in status_message:
+                    colored_print(f"Repository {repo_name}: {status_message}", YELLOW)
+                else:
+                    colored_print(f"Repository {repo_name}: {status_message}", RED)
+            except subprocess.CalledProcessError:
+                colored_print(f"Failed to check status for repository {repo_name}.", RED)
+
 if __name__ == "__main__":
     while True:
-        action = input("Select an action (clone/set-output/set-input/check-cloned/extract/quit): ")
+        action = input("Select an action (clone/set-output/set-input/check-cloned/extract/check-status/quit): ")
         if action == "clone":
             clone_repositories()
         elif action == "set-output":
@@ -162,7 +196,9 @@ if __name__ == "__main__":
             output_folder = input("Enter the output folder path containing Git repositories: ")
             output_json_file = input("Enter the output JSON file path for extracted repositories: ")
             extract_repositories(output_folder, output_json_file)
+        elif action == "check-status":
+            check_repo_status()
         elif action == "quit":
             break
         else:
-            colored_print("Invalid action. Please choose 'clone', 'set-output', 'set-input', 'check-cloned', 'extract', or 'quit'.", RED)
+            colored_print("Invalid action. Please choose 'clone', 'set-output', 'set-input', 'check-cloned', 'extract', 'check-status', or 'quit'.", RED)
