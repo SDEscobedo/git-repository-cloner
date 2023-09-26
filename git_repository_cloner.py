@@ -121,10 +121,14 @@ def clone_repositories():
 
 def extract_repositories(output_folder, output_json_file):
     output_data = []
+    
+    # Get the absolute path of the output_folder
+    output_folder = os.path.abspath(output_folder)
+
     for root, dirs, files in os.walk(output_folder):
         if ".git" in dirs:
             # This directory contains a .git subdirectory, indicating it's a Git repository
-            repo_name = os.path.basename(root)
+            repo_name = os.path.relpath(root, output_folder)
             repo_path = os.path.join(root, ".git")
 
             try:
@@ -140,7 +144,6 @@ def extract_repositories(output_folder, output_json_file):
         json.dump(output_data, f, indent=4)
 
     colored_print(f"Repositories extracted and saved to {output_json_file}.", GREEN)
-
 
 if __name__ == "__main__":
     while True:
