@@ -1,6 +1,7 @@
 import json
 import subprocess
 import os
+from tqdm import tqdm
 
 # ANSI escape codes for colors
 GREEN = "\033[92m"
@@ -121,16 +122,14 @@ def clone_repositories():
 
 def extract_repositories(output_folder, output_json_file):
     output_data = []
-    
-    # Get the absolute path of the output_folder
-    output_folder = os.path.abspath(output_folder)
 
-    for root, dirs, files in os.walk(output_folder):
+    colored_print("Extracting repositories:")
+    for root, dirs, _ in tqdm(os.walk(output_folder), unit="repository"):
         if ".git" in dirs:
             # This directory contains a .git subdirectory, indicating it's a Git repository
             repo_name = os.path.relpath(root, output_folder)
             repo_path = os.path.join(root, ".git")
-
+            
             try:
                 result = subprocess.run(['git', 'config', '--get', 'remote.origin.url'], cwd=repo_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
                 if result.returncode == 0:
@@ -139,11 +138,12 @@ def extract_repositories(output_folder, output_json_file):
                     output_data.append(repo_info)
             except subprocess.CalledProcessError:
                 pass  # Ignore Git errors
-
+           
     with open(output_json_file, 'w') as f:
         json.dump(output_data, f, indent=4)
 
     colored_print(f"Repositories extracted and saved to {output_json_file}.", GREEN)
+
 
 def check_repo_status():
     # Load the config file to get the input JSON file path
